@@ -28,10 +28,6 @@ module.exports = {
           from: path.resolve(__dirname, "diagrams"),
           to: "assets/diagrams",
         },
-        {
-          from: path.resolve(__dirname, "node_modules/bpmn-js/dist/assets"),
-          to: "assets/bpmn-js",
-        },
       ],
     }),
   ],
@@ -44,7 +40,7 @@ module.exports = {
     rules: [
       {
         test: /\.css$/,
-        use: ["style-loader", "css-loader"],
+        use: ["css-loader"],
       },
       {
         test: /\.ttf$/,

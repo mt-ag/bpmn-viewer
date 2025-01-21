@@ -6,297 +6,141 @@
   <title>Flows for APEX - Viewer</title>
 
   <link rel="stylesheet" href="/assets/css/flows4apex.viewer.css" type="text/css"/>
-  <link rel="stylesheet" href="/assets/bpmn-js/diagram-js.css" type="text/css"/>
+  <!-- <link rel="stylesheet" href="/assets/bpmn-js/diagram-js.css" type="text/css"/>
   <link rel="stylesheet" href="/assets/bpmn-js/bpmn-js.css" type="text/css"/>
-  <link rel="stylesheet" href="/assets/bpmn-js/bpmn-font/css/bpmn-embedded.css" type="text/css"/>
-  <link type="text/css" rel="stylesheet" href=" https://static.oracle.com/cdn/apex/21.1.0/libraries/font-apex/2.1/css/font-apex.min.css">
+  <link rel="stylesheet" href="/assets/bpmn-js/bpmn-font/css/bpmn-embedded.css" type="text/css"/> -->
+  <link rel="stylesheet" href="https://static.oracle.com/cdn/apex/24.2.0/libraries/font-apex/2.4/css/font-apex.min.css?v=24.2.0" type="text/css"/>
 </head>
 
 <style>
 </style>
 
 <body>
-  <div class="flows4apex-viewer FLOWS-DARK">
-    <div id="canvas" class="canvas"></div>
-  </div>
-  <script src="./bundle.js"></script>
+  <f4a-viewer
+    regionId="viewer"
+    allowDownload="true"
+    addHighlighting="true"
+    useBPMNcolors=false
+    enableCallActivities="true"
+    showToolbar="true"
+    enableMousewheelZoom="true"
+    themePluginClass="FLOWS-DARK" ></f4a-viewer>
   <script>
-    var myBpmnViewer = new bpmnViewer.Viewer({
-      container: "#canvas",
-      additionalModules: [
-        bpmnViewer.customModules.MoveCanvasModule,
-        bpmnViewer.customModules.ZoomScrollModule,
-        bpmnViewer.customModules.drilldownCentering,
-        bpmnViewer.customModules.callActivityModule,
-        bpmnViewer.customModules.multiInstanceModule,
-        bpmnViewer.customModules.styleModule,
-        bpmnViewer.customModules.customPaletteProviderModule,
-        // bpmnViewer.customModules.rightClickModule,
-        bpmnViewer.customModules.userTaskModule
-      ],
-      bpmnRenderer: {
-        defaultFillColor: "var(--default-fill-color)",
-        defaultStrokeColor: "var(--default-stroke-color)",
-        defaultLabelColor: "var(--default-stroke-color)",
-      },
-      config: {
-        currentStyle: {
-          "fill": "#6aad42",
-          "border": "black",
-          "label": "black"
-        },
-        completedStyle: {
-          "fill": "#8c9eb0",
-          "border": "black",
-          "label": "black"
-        },
-        errorStyle: {
-          "fill": "#d2423b",
-          "border": "black",
-          "label": "white"
-        },
-        allowDownload: true,
-        addHighlighting: true,
-        useBPMNcolors: false,
-      }
-    });
-
-    function widget() {
-      this.updateColors = function(current, completed, error) {
-
-        const config = myBpmnViewer.get('config').config;
-        const styleModule = myBpmnViewer.get('styleModule');
-
-        this.resetColors()
-
-        if (config.addHighlighting) {
-          styleModule.highlightElements(current, completed, error);
-        }
-      }
-      this.resetColors = function() {
-        
-        const config = myBpmnViewer.get('config').config;
-        const styleModule = myBpmnViewer.get('styleModule');
-
-        if (!config.useBPMNcolors) {
-          styleModule.resetBPMNcolors();
-        }
-
-        styleModule.resetHighlighting();
-      }
-    }
-
-    async function downloadAsSVG() {
-      try {
-        const result = await myBpmnViewer.saveSVG({ format: true });
-        const { svg } = result;
-
-        const styledSVG = myBpmnViewer.get('styleModule').addStyleToSVG(svg);
-
-        var svgBlob = new Blob([styledSVG], {
-            type: 'image/svg+xml'
-        });
-        var fileName = Math.random(36).toString().substring(7) + '.svg';
-
-        var downloadLink = document.createElement('a');
-        downloadLink.download = fileName;
-        downloadLink.href = window.URL.createObjectURL(svgBlob);
-        downloadLink.click();
-
-      } catch (err) {
-        console.log(err);
-      }
-    }
-
-    async function openDiagram(bpmnXML) {
-      // import diagram
-      try {
-        await myBpmnViewer.importXML(bpmnXML);
-
-        // access viewer components
-        var canvas = myBpmnViewer.get("canvas");
-        var overlays = myBpmnViewer.get("overlays");
-        
-        const _widget = new widget();
-
-        myBpmnViewer.get('callActivityModule').setWidget(_widget);
-        myBpmnViewer.get('multiInstanceModule').setWidget(_widget);
-        myBpmnViewer.get('userTaskModule').setWidget(_widget);
-
-        /* DEMO DATA - must be attached to widget */
-        _widget.current = ["Activity_A2"];
-        _widget.completed = ["Event_Start","Activity_PreSplit","Activity_A1"];
-        _widget.error = [];
-
-        // _widget.iterationData = {
-        //   "Activity_1khhvsw": [
-        //       {
-        //           "stepKey": "12345",
-        //           "loopCounter": 1,
-        //           "description": "Iteration 1",
-        //           "parentStepKey": null,
-        //           "status": "running",
-        //       }
-        //   ],
-        //   "Activity_1oy56wg": [
-        //     {
-        //       "stepKey": "12345",
-        //       "loopCounter": 1,
-        //       "description": "Iteration 1",
-        //       "parentStepKey": null,
-        //       "status": "running",
-        //       "highlighting": {}
-        //     },
-        //     {
-        //       "stepKey": "23456",
-        //       "loopCounter": 2,
-        //       "description": "Iteration 2",
-        //       "parentStepKey": null,
-        //       "status": "running",
-        //       "highlighting": {}
-        //     }
-        //   ]
-        // }
-
-        _widget.iterationData = {
-          "Activity_A2": [
-            {
-                "stepKey": "HzWFmaqGWC",
-                "loopCounter": 1,
-                "description": "Iteration A2 - iteration 1 (JONES)",
-                "parentStepKey": null,
-                "status": "running",
-                "highlighting": {
-                    "completed": ["Event_A2Start"],
-                    "current": ["Activity_A2a"]
-                }
-            },
-            {
-                "stepKey": "nzxcfwoPsq",
-                "loopCounter": 2,
-                "description": "Iteration A2 - iteration 2 (SCOTT)",
-                "parentStepKey": null,
-                "status": "running",
-                "highlighting": {
-                    "completed": ["Event_A2Start","Activity_A2a"],
-                    "current": ["Activity_A2b"]
-                }
-            },
-            {
-                "stepKey": "edFUfYXvyw",
-                "loopCounter": 3,
-                "description": "Iteration A2 - iteration 3 (FORD)",
-                "parentStepKey": null,
-                "status": "running",
-                "highlighting": {
-                    "completed": ["Event_A2Start"],
-                    "current": ["Activity_A2a"]
-                }
-            },
-            {
-                "stepKey": "sTtxLGXwia",
-                "loopCounter": 4,
-                "description": "Iteration A2 - iteration 4 (SMITH)",
-                "parentStepKey": null,
-                "status": "running",
-                "highlighting": {
-                    "completed": ["Event_A2Start"],
-                    "current": ["Activity_A2a"]
-                }
-            },
-            {
-                "stepKey": "sQOruNJpdv",
-                "loopCounter": 5,
-                "description": "Iteration A2 - iteration 5 (ADAMS)",
-                "parentStepKey": null,
-                "status": "running",
-                "highlighting": {
-                    "completed": ["Event_A2Start"],
-                    "current": ["Activity_A2a"]
-                }
-            }
-          ],
-          "Activity_A2b": [
-              {
-                  "stepKey": "GCDKvCEvwm",
-                  "loopCounter": 1,
-                  "description": "Sub Iteration A2b - iteration 1 (BLAKE)",
-                  "parentStepKey": "nzxcfwoPsq",
-                  "status": "running",
-                  "highlighting": {
-                      "completed": ["Event_A2bStart"],
-                      "current": ["Activity_A2b1"]
-                  }
-              }
-          ],
-          "Activity_A3": [
-            {
-              "stepKey": "12345",
-              "loopCounter": 1,
-              "description": "Iteration 1",
-              "parentStepKey": null,
-              "status": "running",
-              "highlighting": {}
-            },
-            {
-              "stepKey": "23456",
-              "loopCounter": 2,
-              "description": "Iteration 2",
-              "parentStepKey": null,
-              "status": "running",
-              "highlighting": {}
-            }
-          ]
-        };
-
-        myBpmnViewer.get('multiInstanceModule').addOverlays();
-
-        _widget.userTaskData = {
-          "Activity_A2a": "https://github.com/mt-ag/bpmn-viewer",
-          "Activity_A3": "https://github.com/mt-ag/bpmn-viewer",
-        };
-
-        myBpmnViewer.get('userTaskModule').addOverlays();
-
-        if ( myBpmnViewer.get('config').config.addHighlighting || myBpmnViewer.get('config').config.useBPMNcolors ) {
-          
-          const eventBus = myBpmnViewer.get('eventBus');
-          const multiInstanceModule = myBpmnViewer.get('multiInstanceModule');
-          const styleModule = myBpmnViewer.get('styleModule');
-          
-          _widget.updateColors(_widget.current, _widget.completed, _widget.error);
-
-          eventBus.on('root.set', (event) => {
-            const {element} = event;
-
-            if (!multiInstanceModule.isMultiInstanceSubProcess(element)) {
-              _widget.updateColors(_widget.current, _widget.completed, _widget.error);
-            }
-          });
-        }
-
-        // zoom to fit full viewport
-        canvas.zoom("fit-viewport");
-      } catch (err) {
-        console.error("could not import BPMN 2.0 diagram", err);
-      }
-    }
-
-    async function init() {
+    document.addEventListener('DOMContentLoaded', function() {
       // fetch("/assets/diagrams/SubProcessColors.bpmn")
       fetch("/assets/diagrams/A25i - Nested Parallel SubProcess Iterations.bpmn")
       .then(data => {
         data.text()
         .then(result => {
-          openDiagram(result);
+          const viewerElement = document.querySelector('f4a-viewer');
+          viewerElement.loadDiagram(result);
+
+          /* DEMO DATA - must be attached to element */
+          viewerElement.current = ["Activity_A2"];
+          viewerElement.completed = ["Event_Start","Activity_PreSplit","Activity_A1"];
+          viewerElement.error = [];
+
+          viewerElement.iterationData = {
+            "Activity_A2": [
+              {
+                  "stepKey": "HzWFmaqGWC",
+                  "loopCounter": 1,
+                  "description": "Iteration A2 - iteration 1 (JONES)",
+                  "parentStepKey": null,
+                  "status": "running",
+                  "highlighting": {
+                      "completed": ["Event_A2Start"],
+                      "current": ["Activity_A2a"]
+                  }
+              },
+              {
+                  "stepKey": "nzxcfwoPsq",
+                  "loopCounter": 2,
+                  "description": "Iteration A2 - iteration 2 (SCOTT)",
+                  "parentStepKey": null,
+                  "status": "running",
+                  "highlighting": {
+                      "completed": ["Event_A2Start","Activity_A2a"],
+                      "current": ["Activity_A2b"]
+                  }
+              },
+              {
+                  "stepKey": "edFUfYXvyw",
+                  "loopCounter": 3,
+                  "description": "Iteration A2 - iteration 3 (FORD)",
+                  "parentStepKey": null,
+                  "status": "running",
+                  "highlighting": {
+                      "completed": ["Event_A2Start"],
+                      "current": ["Activity_A2a"]
+                  }
+              },
+              {
+                  "stepKey": "sTtxLGXwia",
+                  "loopCounter": 4,
+                  "description": "Iteration A2 - iteration 4 (SMITH)",
+                  "parentStepKey": null,
+                  "status": "running",
+                  "highlighting": {
+                      "completed": ["Event_A2Start"],
+                      "current": ["Activity_A2a"]
+                  }
+              },
+              {
+                  "stepKey": "sQOruNJpdv",
+                  "loopCounter": 5,
+                  "description": "Iteration A2 - iteration 5 (ADAMS)",
+                  "parentStepKey": null,
+                  "status": "running",
+                  "highlighting": {
+                      "completed": ["Event_A2Start"],
+                      "current": ["Activity_A2a"]
+                  }
+              }
+            ],
+            "Activity_A2b": [
+                {
+                    "stepKey": "GCDKvCEvwm",
+                    "loopCounter": 1,
+                    "description": "Sub Iteration A2b - iteration 1 (BLAKE)",
+                    "parentStepKey": "nzxcfwoPsq",
+                    "status": "running",
+                    "highlighting": {
+                        "completed": ["Event_A2bStart"],
+                        "current": ["Activity_A2b1"]
+                    }
+                }
+            ],
+            "Activity_A3": [
+              {
+                "stepKey": "12345",
+                "loopCounter": 1,
+                "description": "Iteration 1",
+                "parentStepKey": null,
+                "status": "running",
+                "highlighting": {}
+              },
+              {
+                "stepKey": "23456",
+                "loopCounter": 2,
+                "description": "Iteration 2",
+                "parentStepKey": null,
+                "status": "running",
+                "highlighting": {}
+              }
+            ]
+          };
+
+          viewerElement.userTaskData = {
+            "Activity_C3": "https://github.com/mt-ag/bpmn-viewer",
+        };
         })
       })
       .catch(error => {
         console.error("could not load BPMN 2.0 diagram", error);
-      })
-  }
-
-  init();
+      });
+    });
   </script>
+  <script src="./bundle.js"></script>
 </body>
 </html>
