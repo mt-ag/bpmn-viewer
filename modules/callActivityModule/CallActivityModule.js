@@ -3,14 +3,13 @@ import { is } from 'bpmn-js/lib/util/ModelUtil';
 import { domify, query as domQuery } from 'min-dom';
 
 var ARROW_DOWN_SVG = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M4.81801948,3.50735931 L10.4996894,9.1896894 L10.5,4 L12,4 L12,12 L4,12 L4,10.5 L9.6896894,10.4996894 L3.75735931,4.56801948 C3.46446609,4.27512627 3.46446609,3.80025253 3.75735931,3.50735931 C4.05025253,3.21446609 4.52512627,3.21446609 4.81801948,3.50735931 Z"/></svg>';
-export default function CustomDrilldown(
-    canvas, eventBus, elementRegistry, overlays, moddle
-) {
+export default function CustomDrilldown(canvas, eventBus, elementRegistry, overlays, moddle, component) {
   this._canvas = canvas;
   this._eventBus = eventBus;
   this._elementRegistry = elementRegistry;
   this._overlays = overlays;
   this._moddle = moddle;
+  this._component = component;
 
   // create and append breadcrumb
   this._breadcrumb = domify('<ul class="bjs-breadcrumbs" id="callActivityBreadcrumb"></ul>');
@@ -46,7 +45,7 @@ CustomDrilldown.prototype.addOverlay = function (element) {
     var objectId = element.id;
 
     // retrieve hieracry + current diagram
-    var { data, diagramIdentifier } = this._widget;
+    var { data, diagramIdentifier } = this._component;
 
     // get new diagram from hierarchy
     var newDiagram = data.find(
@@ -59,13 +58,13 @@ CustomDrilldown.prototype.addOverlay = function (element) {
     if (newDiagram && newDiagram.insight === 1) {
       
       // set new diagram properties
-      this._widget.diagramIdentifier = newDiagram.diagramIdentifier;
-      this._widget.callingDiagramIdentifier = newDiagram.callingDiagramIdentifier;
-      this._widget.callingObjectId = newDiagram.callingObjectId;
+      this._component.diagramIdentifier = newDiagram.diagramIdentifier;
+      this._component.callingDiagramIdentifier = newDiagram.callingDiagramIdentifier;
+      this._component.callingObjectId = newDiagram.callingObjectId;
       
-      this._widget.current = newDiagram.current;
-      this._widget.completed = newDiagram.completed;
-      this._widget.error = newDiagram.error;
+      this._component.current = newDiagram.current;
+      this._component.completed = newDiagram.completed;
+      this._component.error = newDiagram.error;
 
       // update breadcrumb
       this.updateBreadcrumb();
@@ -74,8 +73,8 @@ CustomDrilldown.prototype.addOverlay = function (element) {
       const subProcessBreadcrumb = domQuery('.bjs-breadcrumbs:not(#callActivityBreadcrumb)', this._container);
       subProcessBreadcrumb.style.top = '60px';
 
-      // invoke loadDiagram of widget
-      this._widget.loadDiagram(newDiagram.diagram);
+      // invoke loadDiagram of component
+      this._component.loadDiagram(newDiagram.diagram);
     }
   });
 
@@ -99,14 +98,10 @@ CustomDrilldown.prototype.removeOverlay = function (element) {
   });
 };
 
-CustomDrilldown.prototype.setWidget = function (widget) {
-  this._widget = widget;
-};
-
 CustomDrilldown.prototype.updateBreadcrumb = function () {
 
   // retrieve hierarchy
-  const { data, diagramIdentifier, callingDiagramIdentifier, callingObjectId } = this._widget;
+  const { data, diagramIdentifier, callingDiagramIdentifier, callingObjectId } = this._component;
 
   // retrieve properties of current diagram
   var { breadcrumb } = data.find(
@@ -133,7 +128,7 @@ CustomDrilldown.prototype.updateBreadcrumb = function () {
     var { index, diagramidentifier } = link.dataset;
 
     // retrieve current(!) hierarchy
-    const { data } = this._widget;
+    const { data } = this._component;
 
     // get new diagram from hierarchy
     var newDiagram = data.find(
@@ -147,16 +142,16 @@ CustomDrilldown.prototype.updateBreadcrumb = function () {
       this.trimBreadcrumbTo(index);
 
       // set new diagram properties
-      this._widget.diagramIdentifier = newDiagram.diagramIdentifier;
-      this._widget.callingDiagramIdentifier = newDiagram.callingDiagramIdentifier;
-      this._widget.callingObjectId = newDiagram.callingObjectId;
+      this._component.diagramIdentifier = newDiagram.diagramIdentifier;
+      this._component.callingDiagramIdentifier = newDiagram.callingDiagramIdentifier;
+      this._component.callingObjectId = newDiagram.callingObjectId;
 
-      this._widget.current = newDiagram.current;
-      this._widget.completed = newDiagram.completed;
-      this._widget.error = newDiagram.error;
+      this._component.current = newDiagram.current;
+      this._component.completed = newDiagram.completed;
+      this._component.error = newDiagram.error;
 
-      // invoke loadDiagram of widget
-      this._widget.loadDiagram(newDiagram.diagram);
+      // invoke loadDiagram of component
+      this._component.loadDiagram(newDiagram.diagram);
     }
   });
 
@@ -231,5 +226,6 @@ CustomDrilldown.$inject = [
   'eventBus',
   'elementRegistry',
   'overlays',
-  'moddle'
+  'moddle',
+  'config.component'
 ];

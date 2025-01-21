@@ -5,12 +5,13 @@ import { domify, query as domQuery } from 'min-dom';
 
 export class MultiInstanceModule {
   
-  constructor(canvas, eventBus, elementRegistry, translate, overlays) {
+  constructor(canvas, eventBus, elementRegistry, translate, overlays, component) {
     this._canvas = canvas;
     this._eventBus = eventBus;
     this._elementRegistry = elementRegistry;
     this._translate = translate;
     this._overlays = overlays;
+    this._component = component;
 
     this.breadcrumbIteration = [];
     this.breadcrumbSelection = [];
@@ -83,12 +84,6 @@ export class MultiInstanceModule {
     });
   }
 
-  /* Initialisation */
-
-  setWidget(widget) {
-    this._widget = widget;
-  }
-
   /* Helper */
 
   getIterationData(element) {
@@ -98,10 +93,10 @@ export class MultiInstanceModule {
     // get parent iteration from breadcrumb
     const parentIteration = this.breadcrumbSelection[this.getLastBreadcrumbIndex() - 1];
 
-    // retrieve data from widget by using id and stepKey
-    return (this._widget.iterationData &&
-      this._widget.iterationData[id] &&
-      this._widget.iterationData[id].filter(
+    // retrieve data from component by using id and stepKey
+    return (this._component.iterationData &&
+      this._component.iterationData[id] &&
+      this._component.iterationData[id].filter(
         i => ((!parentIteration && !i.parentStepKey) || (parentIteration && i.parentStepKey == parentIteration.stepKey))
       )) || [];
   }
@@ -310,18 +305,25 @@ export class MultiInstanceModule {
   
   updateHighlighting() {
 
-    if (this._widget) {
+    if (this._component) {
 
       const currentIteration = this.breadcrumbSelection[this.getLastBreadcrumbIndex()];
 
       if (currentIteration) {
         const { current, completed, error } = currentIteration.highlighting;
-        this._widget.updateColors(current, completed, error);
+        this._component.updateColors(current, completed, error);
       } else {
-        this._widget.resetColors();
+        this._component.resetColors();
       }
     }
   }
 }
 
-MultiInstanceModule.$inject = ['canvas', 'eventBus', 'elementRegistry', 'translate', 'overlays'];
+MultiInstanceModule.$inject = [
+  'canvas',
+  'eventBus',
+  'elementRegistry',
+  'translate',
+  'overlays',
+  'config.component'
+];

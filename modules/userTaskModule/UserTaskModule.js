@@ -4,17 +4,18 @@ import { domify } from 'min-dom';
 
 export class UserTaskModule {
 
-  constructor(canvas, eventBus, elementRegistry, translate, overlays) {
+  constructor(canvas, eventBus, elementRegistry, translate, overlays, component) {
     this._canvas = canvas;
     this._eventBus = eventBus;
     this._elementRegistry = elementRegistry;
     this._translate = translate;
     this._overlays = overlays;
+    this._component = component;
   }
 
   addOverlays() {
 
-    const { userTaskData } = this._widget;
+    const { userTaskData } = this._component;
 
     this._elementRegistry.filter((element) => {
       const bo = getBusinessObject(element);
@@ -47,10 +48,13 @@ export class UserTaskModule {
       html: button
     });
   }
-
-  setWidget(widget) {
-    this._widget = widget;
-  }
 }
 
-UserTaskModule.$inject = ['canvas', 'eventBus', 'elementRegistry', 'translate', 'overlays'];
+UserTaskModule.$inject = [
+  'canvas',
+  'eventBus',
+  'elementRegistry',
+  'translate',
+  'overlays',
+  'config.component'
+];

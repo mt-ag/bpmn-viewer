@@ -91,16 +91,16 @@ class Viewer extends HTMLElement {
 
   initViewer() {
     this.viewer = new BpmnViewer({
+      component: this,
       container: this.shadowRoot.querySelector(`#${this.canvas.id}`),
       additionalModules: [
-       ...(this.showToolbar || this.enableMousewheelZoom) ? [MoveCanvasModule] : [], // TODO check condition
+       ...(this.showToolbar || this.enableMousewheelZoom) ? [MoveCanvasModule] : [],
         ...(this.enableMousewheelZoom) ? [ZoomScrollModule] : [],
         drilldownCentering,
         ...(this.enableCallActivities) ? [callActivityModule] : [],
         multiInstanceModule,
         ...(this.addHighlighting || this.useBPMNcolors) ? [styleModule] : [],
         ...(this.showToolbar) ? [customPaletteProviderModule] : [],
-        // bpmnViewer.customModules.rightClickModule,
         userTaskModule
       ],
       bpmnRenderer: {
@@ -131,14 +131,6 @@ class Viewer extends HTMLElement {
     });
   }
 
-  initModules() {
-    
-    this.viewer.get('multiInstanceModule').setWidget(this);
-    this.viewer.get('userTaskModule').setWidget(this);
-
-    if (this.enableCallActivities) this.viewer.get('callActivityModule').setWidget(this);
-  }
-
   connectedCallback() {
 
     this.initCSS();
@@ -146,8 +138,6 @@ class Viewer extends HTMLElement {
     this.initHTML();
 
     this.initViewer();
-
-    this.initModules();
   }
 
   async loadData(data) {
@@ -177,9 +167,8 @@ class Viewer extends HTMLElement {
         callActivityModule.resetBreadcrumb();
         callActivityModule.updateBreadcrumb();
       }
-    }
     // call activities not activated
-    else {
+    } else {
       // get first (only) entry
       [diagram] = data;
       this.diagramIdentifier = diagram.diagramIdentifier;
@@ -262,6 +251,7 @@ class Viewer extends HTMLElement {
       // );
 
     } catch (err) {
+      console.log(err);
       apex.debug.error('Loading Diagram failed.', err, this.diagram);
     }
   }
@@ -298,8 +288,26 @@ class Viewer extends HTMLElement {
     this.viewer.get('canvas').zoom(zoomOption, 'auto');
   }
 
-  async downloadAsSVG() {
-    this.viewer.get('paletteProvider').downloadAsSVG();
+  async downloadAsSVG() { // TODO add check allowDownload
+    try {
+      const result = await this.viewer.saveSVG({ format: true });
+      const { svg } = result;
+
+      const styledSVG = this.viewer.get('styleModule').addStyleToSVG(svg);
+
+      const svgBlob = new Blob([styledSVG], {
+          type: 'image/svg+xml'
+      });
+      const fileName = `${Math.random(36).toString().substring(7)}.svg`;
+
+      const downloadLink = document.createElement('a');
+      downloadLink.download = fileName;
+      downloadLink.href = window.URL.createObjectURL(svgBlob);
+      downloadLink.click();
+
+    } catch (err) {
+      console.log(err);
+    }
   }
 }
 
