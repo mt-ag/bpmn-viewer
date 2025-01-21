@@ -12,7 +12,7 @@ import styleModule from './modules/styleModule';
 import multiInstanceModule from './modules/multiInstanceModule';
 import userTaskModule from './modules/userTaskModule/';
 
-import css from './assets/css/flows4apex.viewer.css';
+import css from './assets/css/style.css';
 import bpmnCSS from 'bpmn-js/dist/assets/bpmn-js.css';
 import diagramCSS from 'bpmn-js/dist/assets/diagram-js.css';
 
