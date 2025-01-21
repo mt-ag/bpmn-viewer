@@ -41,17 +41,20 @@ export class MultiInstanceModule {
       </div>
     `);
 
+    // get canvas container
+    this._container = this._canvas.getContainer();
+
     // append content
-    canvas.getContainer().appendChild(modal);
+    this._container.appendChild(modal);
 
     eventBus.on('import.render.complete', () => {
       // add search listener for filtering
-      const searchbar = domQuery('#iteration-search input');
+      const searchbar = domQuery('#iteration-search input', this._container);
       searchbar.addEventListener('keyup', (event) => {
         this.filterIterations(event);
       });
       // add close listener
-      const closeButton = domQuery('#iteration-title button.fa-times');
+      const closeButton = domQuery('#iteration-title button.fa-times', this._container);
       closeButton.addEventListener('click', (event) => {
         this.closeIterations();
       });
@@ -147,7 +150,7 @@ export class MultiInstanceModule {
   /* Breadcrumb */
 
   getBreadcrumbElements() {
-    const breadcrumb = domQuery('.bjs-breadcrumbs'); // TODO fix selector for excluding call activity breadcrumb
+    const breadcrumb = domQuery('.bjs-breadcrumbs', this._container); // TODO fix selector for excluding call activity breadcrumb
     return [...breadcrumb.children];
   }
 
@@ -221,8 +224,8 @@ export class MultiInstanceModule {
 
   openDialog() {
 
-    const searchbar = domQuery('#iteration-search input');
-    const modal = domQuery('#modal');
+    const searchbar = domQuery('#iteration-search input', this._container);
+    const modal = domQuery('#modal', this._container);
 
     // clear searchbar
     searchbar.value = '';
@@ -232,7 +235,7 @@ export class MultiInstanceModule {
 
   loadTable(data) {
 
-    const tbody = domQuery('#iteration-list tbody');
+    const tbody = domQuery('#iteration-list tbody', this._container);
 
     // build table body
     tbody.replaceChildren(
@@ -268,7 +271,7 @@ export class MultiInstanceModule {
       this.loadTable();
 
       // set title
-      const title = domQuery('#iteration-title span');
+      const title = domQuery('#iteration-title span', this._container);
       title.textContent = getBusinessObject(element).name;
 
       this.openDialog();
@@ -277,7 +280,7 @@ export class MultiInstanceModule {
 
   closeIterations() {
 
-    const modal = domQuery('#modal');
+    const modal = domQuery('#modal', this._container);
 
     modal.style.display = 'none';
   }

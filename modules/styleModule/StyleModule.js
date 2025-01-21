@@ -1,17 +1,19 @@
-export default function StyleModule(config, bpmnRenderer, elementRegistry) {
+import { query as domQuery } from 'min-dom';
+
+export default function StyleModule(config, bpmnRenderer, elementRegistry, canvas) { // TODO rebuild to class?
 
   // set global css variables
-  const canvas = document.querySelector('.canvas');
+  const container = canvas.getContainer();
 
-  canvas.style.setProperty('--highlight-current-fill', config.currentStyle.fill);
-  canvas.style.setProperty('--highlight-current-border', config.currentStyle.border);
-  canvas.style.setProperty('--highlight-current-label', config.currentStyle.label);
-  canvas.style.setProperty('--highlight-completed-fill', config.completedStyle.fill);
-  canvas.style.setProperty('--highlight-completed-border', config.completedStyle.border);
-  canvas.style.setProperty('--highlight-completed-label', config.completedStyle.label);
-  canvas.style.setProperty('--highlight-error-fill', config.errorStyle.fill);
-  canvas.style.setProperty('--highlight-error-border', config.errorStyle.border);
-  canvas.style.setProperty('--highlight-error-label', config.errorStyle.label);
+  container.style.setProperty('--highlight-current-fill', config.currentStyle.fill);
+  container.style.setProperty('--highlight-current-border', config.currentStyle.border);
+  container.style.setProperty('--highlight-current-label', config.currentStyle.label);
+  container.style.setProperty('--highlight-completed-fill', config.completedStyle.fill);
+  container.style.setProperty('--highlight-completed-border', config.completedStyle.border);
+  container.style.setProperty('--highlight-completed-label', config.completedStyle.label);
+  container.style.setProperty('--highlight-error-fill', config.errorStyle.fill);
+  container.style.setProperty('--highlight-error-border', config.errorStyle.border);
+  container.style.setProperty('--highlight-error-label', config.errorStyle.label);
 
   this.addStyleToElements = function (elements, className) {
 
@@ -19,7 +21,7 @@ export default function StyleModule(config, bpmnRenderer, elementRegistry) {
 
     for (const e of elements) {
 
-      element = document.querySelector(`g[data-element-id="${e}"]:not(.djs-connection) .djs-visual`);
+      element = domQuery(`g[data-element-id="${e}"]:not(.djs-connection) .djs-visual`, container);
 
       if (element) {
         element.classList.add(className);
@@ -40,7 +42,7 @@ export default function StyleModule(config, bpmnRenderer, elementRegistry) {
 
     for (const e of elements) {
 
-      element = document.querySelector(`g[data-element-id="${e}"]:not(.djs-connection) .djs-visual`);
+      element = domQuery(`g[data-element-id="${e}"]:not(.djs-connection) .djs-visual`, container);
 
       if (element) {
         element.classList.remove('highlight-current');
@@ -57,7 +59,7 @@ export default function StyleModule(config, bpmnRenderer, elementRegistry) {
 
     for (const e of elements) {
 
-      element = document.querySelector(`g[data-element-id="${e}"]:not(.djs-connection) .djs-visual`);
+      element = domQuery(`g[data-element-id="${e}"]:not(.djs-connection) .djs-visual`, container);
 
       if (element) {
 
@@ -90,5 +92,6 @@ StyleModule.$inject = [
   // custom viewer properties nested inside parent config object
   'config.config',
   'config.bpmnRenderer',
-  'elementRegistry'
+  'elementRegistry',
+  'canvas'
 ];
