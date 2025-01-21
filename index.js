@@ -33,6 +33,8 @@ class Viewer extends HTMLElement {
     this.enableMousewheelZoom = (this.getAttribute('enableMousewheelZoom') === 'true');
     this.enableCallActivities = (this.getAttribute('enableCallActivities') === 'true');
 
+    this.config = JSON.parse(this.getAttribute('config')) || {};
+
     // create shadow dom
     this.attachShadow({ mode: 'open' });
   }
@@ -94,7 +96,7 @@ class Viewer extends HTMLElement {
       component: this,
       container: this.shadowRoot.querySelector(`#${this.canvas.id}`),
       additionalModules: [
-       ...(this.showToolbar || this.enableMousewheelZoom) ? [MoveCanvasModule] : [],
+        ...(this.showToolbar || this.enableMousewheelZoom) ? [MoveCanvasModule] : [],
         ...(this.enableMousewheelZoom) ? [ZoomScrollModule] : [],
         drilldownCentering,
         ...(this.enableCallActivities) ? [callActivityModule] : [],
@@ -109,26 +111,31 @@ class Viewer extends HTMLElement {
         defaultLabelColor: 'var(--default-stroke-color)',
       },
       config: {
-        currentStyle: {
+        currentStyle: this.config.currentStyle ||
+        {
           'fill': '#6aad42',
           'border': 'black',
           'label': 'black'
         },
-        completedStyle: {
+        completedStyle: this.config.completedStyle ||
+        {
           'fill': '#8c9eb0',
           'border': 'black',
           'label': 'black'
         },
-        errorStyle: {
+        errorStyle: this.config.errorStyle ||
+        {
           'fill': '#d2423b',
           'border': 'black',
           'label': 'white'
         },
-        allowDownload: this.allowDownload,
-        addHighlighting: this.addHighlighting,
-        useBPMNcolors: this.useBPMNcolors,
+        allowDownload: Object.hasOwn(this.config, 'allowDownload') ? this.config.allowDownload : true,
       }
     });
+  }
+
+  getEventBus() {
+    return this.viewer.get('eventBus');
   }
 
   connectedCallback() {
@@ -200,9 +207,6 @@ class Viewer extends HTMLElement {
 
   async loadDiagram(diagramContent) {
     
-    // $( "#" + this.canvasId ).show();
-    // $( "#" + this.regionId + " span.nodatafound" ).hide();
-      
     try {
       const result = await this.viewer.importXML(diagramContent);
       const { warnings } = result;
