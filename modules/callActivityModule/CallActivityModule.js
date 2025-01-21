@@ -1,6 +1,6 @@
 
 import { is } from 'bpmn-js/lib/util/ModelUtil';
-import { domify } from 'min-dom';
+import { domify, query as domQuery } from 'min-dom';
 
 var ARROW_DOWN_SVG = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M4.81801948,3.50735931 L10.4996894,9.1896894 L10.5,4 L12,4 L12,12 L4,12 L4,10.5 L9.6896894,10.4996894 L3.75735931,4.56801948 C3.46446609,4.27512627 3.46446609,3.80025253 3.75735931,3.50735931 C4.05025253,3.21446609 4.52512627,3.21446609 4.81801948,3.50735931 Z"/></svg>';
 export default function CustomDrilldown(
@@ -12,20 +12,16 @@ export default function CustomDrilldown(
   this._overlays = overlays;
   this._moddle = moddle;
 
-  var _self = this;
-
   // create and append breadcrumb
   this._breadcrumb = domify('<ul class="bjs-breadcrumbs" id="callActivityBreadcrumb"></ul>');
-  var container = canvas.getContainer();
-  container.appendChild(this._breadcrumb);
+  this._container = this._canvas.getContainer();
+  this._container.appendChild(this._breadcrumb);
 
   // add overlay for drilldown-able elements
-  eventBus.on('import.render.complete', function () {
-    elementRegistry.filter(function (e) {
-      return _self.canDrillDown(e);
-    }).forEach(function (el) {
-      _self.addOverlay(el);
-    });
+  eventBus.on('import.render.complete', () => {
+    elementRegistry
+    .filter(e => this.canDrillDown(e))
+    .forEach(el => this.addOverlay(el));
   });
 }
 
@@ -36,8 +32,6 @@ CustomDrilldown.prototype.canDrillDown = function (element) {
 CustomDrilldown.prototype.addOverlay = function (element) {
   var overlays = this._overlays;
 
-  var _self = this;
-
   var button = domify(`<button class="bjs-drilldown">${ARROW_DOWN_SVG}</button>`);
 
   // remove (possible) existing overlay
@@ -46,13 +40,13 @@ CustomDrilldown.prototype.addOverlay = function (element) {
   }
 
   // add event listener
-  button.addEventListener('click', function (event) {
+  button.addEventListener('click', (_) => {
 
     // clicked object
     var objectId = element.id;
 
     // retrieve hieracry + current diagram
-    var { data, diagramIdentifier } = _self._widget;
+    var { data, diagramIdentifier } = this._widget;
 
     // get new diagram from hierarchy
     var newDiagram = data.find(
@@ -65,23 +59,23 @@ CustomDrilldown.prototype.addOverlay = function (element) {
     if (newDiagram && newDiagram.insight === 1) {
       
       // set new diagram properties
-      _self._widget.diagramIdentifier = newDiagram.diagramIdentifier;
-      _self._widget.callingDiagramIdentifier = newDiagram.callingDiagramIdentifier;
-      _self._widget.callingObjectId = newDiagram.callingObjectId;
-      _self._widget.diagram = newDiagram.diagram;
-      _self._widget.current = newDiagram.current;
-      _self._widget.completed = newDiagram.completed;
-      _self._widget.error = newDiagram.error;
+      this._widget.diagramIdentifier = newDiagram.diagramIdentifier;
+      this._widget.callingDiagramIdentifier = newDiagram.callingDiagramIdentifier;
+      this._widget.callingObjectId = newDiagram.callingObjectId;
+      
+      this._widget.current = newDiagram.current;
+      this._widget.completed = newDiagram.completed;
+      this._widget.error = newDiagram.error;
 
       // update breadcrumb
-      _self.updateBreadcrumb();
+      this.updateBreadcrumb();
 
       // move down sub process breadcrumb
-      const subProcessBreadcrumb = document.querySelector('.bjs-breadcrumbs:not(#callActivityBreadcrumb)');
+      const subProcessBreadcrumb = domQuery('.bjs-breadcrumbs:not(#callActivityBreadcrumb)', this._container);
       subProcessBreadcrumb.style.top = '60px';
 
       // invoke loadDiagram of widget
-      _self._widget.loadDiagram();
+      this._widget.loadDiagram(newDiagram.diagram);
     }
   });
 
@@ -111,8 +105,6 @@ CustomDrilldown.prototype.setWidget = function (widget) {
 
 CustomDrilldown.prototype.updateBreadcrumb = function () {
 
-  var _self = this;
-
   // retrieve hierarchy
   const { data, diagramIdentifier, callingDiagramIdentifier, callingObjectId } = this._widget;
 
@@ -135,13 +127,13 @@ CustomDrilldown.prototype.updateBreadcrumb = function () {
     `${breadcrumb}</a></span></li>`);
 
   // add event listener
-  link.addEventListener('click', function () {
+  link.addEventListener('click', () => {
 
     // clicked object
     var { index, diagramidentifier } = link.dataset;
 
     // retrieve current(!) hierarchy
-    const { data } = _self._widget;
+    const { data } = this._widget;
 
     // get new diagram from hierarchy
     var newDiagram = data.find(
@@ -149,22 +141,22 @@ CustomDrilldown.prototype.updateBreadcrumb = function () {
     );
 
     // all but last entry are clickable
-    if (index < _self._breadcrumb.childNodes.length - 1) {
+    if (index < this._breadcrumb.childNodes.length - 1) {
 
       // trim breadcrumb to clicked entry
-      _self.trimBreadcrumbTo(index);
+      this.trimBreadcrumbTo(index);
 
       // set new diagram properties
-      _self._widget.diagramIdentifier = newDiagram.diagramIdentifier;
-      _self._widget.callingDiagramIdentifier = newDiagram.callingDiagramIdentifier;
-      _self._widget.callingObjectId = newDiagram.callingObjectId;
-      _self._widget.diagram = newDiagram.diagram;
-      _self._widget.current = newDiagram.current;
-      _self._widget.completed = newDiagram.completed;
-      _self._widget.error = newDiagram.error;
+      this._widget.diagramIdentifier = newDiagram.diagramIdentifier;
+      this._widget.callingDiagramIdentifier = newDiagram.callingDiagramIdentifier;
+      this._widget.callingObjectId = newDiagram.callingObjectId;
+
+      this._widget.current = newDiagram.current;
+      this._widget.completed = newDiagram.completed;
+      this._widget.error = newDiagram.error;
 
       // invoke loadDiagram of widget
-      _self._widget.loadDiagram();
+      this._widget.loadDiagram(newDiagram.diagram);
     }
   });
 
@@ -220,7 +212,7 @@ CustomDrilldown.prototype.toggleBreadcrumbVisibility = function () {
 
   } else {
 
-    const subProcessBreadcrumb = document.querySelector('.bjs-breadcrumbs:not(#callActivityBreadcrumb)');
+    const subProcessBreadcrumb = domQuery('.bjs-breadcrumbs:not(#callActivityBreadcrumb)', this._container);
 
     // hide element
     this._breadcrumb.style.display = 'none';

@@ -155,8 +155,6 @@ class Viewer extends HTMLElement {
     let diagram;
     let oldLoaded = true;
 
-    const callActivityModule = this.viewer.get('callActivityModule');
-    
     // if call activities option enabled
     if (this.enableCallActivities) {
       // load old diagram (if possible)
@@ -164,13 +162,15 @@ class Viewer extends HTMLElement {
       // otherwise: get root entry
       if (!diagram) {
         oldLoaded = false;
-        diagram = data.find(d => d.callingDiagramIdentifier === 'undefined');
+        diagram = data.find(d => typeof d.callingDiagramIdentifier === 'undefined');
       } 
       // set references to hierarchy + current diagram
       this.data = data;
       this.diagramIdentifier = diagram.diagramIdentifier;
       this.callingDiagramIdentifier = diagram.callingDiagramIdentifier;
       this.callingObjectId = diagram.callingObjectId;
+
+      const callActivityModule = this.viewer.get('callActivityModule');
 
       // reset & update breadcrumb
       if (!oldLoaded) {
@@ -192,9 +192,6 @@ class Viewer extends HTMLElement {
       this.error = diagram.error;
     }
 
-    // set diagram content
-    this.diagram = diagram.diagram;
-
     // parse iterationData and attach to instance
     try {
       this.iterationData = JSON.parse(diagram.iterationData);
@@ -209,8 +206,7 @@ class Viewer extends HTMLElement {
       this.userTaskData = null;
     }
 
-    // load diagram
-    this.loadDiagram(this.diagram);
+    return diagram.diagram;
   }
 
   async loadDiagram(diagramContent) {
