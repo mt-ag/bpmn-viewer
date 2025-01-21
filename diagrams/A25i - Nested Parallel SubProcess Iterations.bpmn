@@ -94,10 +94,10 @@ where deptno = 20</apex:expression>
         </bpmn:extensionElements>
       </bpmn:multiInstanceLoopCharacteristics>
     </bpmn:task>
-    <bpmn:task id="Activity_C3" name="C3">
+    <bpmn:userTask id="Activity_C3" name="C3">
       <bpmn:incoming>Flow_1dcufu5</bpmn:incoming>
       <bpmn:outgoing>Flow_0opd4zr</bpmn:outgoing>
-    </bpmn:task>
+    </bpmn:userTask>
     <bpmn:endEvent id="Event_CEnd" name="CEnd">
       <bpmn:incoming>Flow_0opd4zr</bpmn:incoming>
     </bpmn:endEvent>
