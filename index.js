@@ -288,7 +288,7 @@ class Viewer extends HTMLElement {
         
     // add highlighting colors to image if option is enabled
     if (this.addHighlighting) {
-      return this.viewer.get('styleModule').addStyleToSVG(svg);
+      return this.viewer.get('styleModule').constructor.addStyleToSVG(svg);
     }
 
     return svg;

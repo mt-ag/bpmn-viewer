@@ -1,4 +1,4 @@
-import StyleModule from './StyleModule.js';
+import { StyleModule } from './StyleModule.js';
 
 export default {
   __init__: ['styleModule'],
