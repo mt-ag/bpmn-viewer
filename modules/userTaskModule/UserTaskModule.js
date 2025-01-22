@@ -1,5 +1,6 @@
 
 import { getBusinessObject, is } from 'bpmn-js/lib/util/ModelUtil';
+// eslint-disable-next-line import/no-extraneous-dependencies
 import { domify } from 'min-dom';
 
 export class UserTaskModule {

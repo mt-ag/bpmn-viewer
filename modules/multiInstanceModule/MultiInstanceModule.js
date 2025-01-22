@@ -1,5 +1,6 @@
 
 import { getBusinessObject, is } from 'bpmn-js/lib/util/ModelUtil';
+// eslint-disable-next-line import/no-extraneous-dependencies
 import { domify, query as domQuery } from 'min-dom';
 
 
@@ -93,11 +94,13 @@ export class MultiInstanceModule {
     // get parent iteration from breadcrumb
     const parentIteration = this.breadcrumbSelection[this.getLastBreadcrumbIndex() - 1];
 
+    console.log(parentIteration);
+
     // retrieve data from component by using id and stepKey
     return (this._component.iterationData &&
       this._component.iterationData[id] &&
       this._component.iterationData[id].filter(
-        i => ((!parentIteration && !i.parentStepKey) || (parentIteration && i.parentStepKey == parentIteration.stepKey))
+        i => ((!parentIteration && !i.parentStepKey) || (parentIteration && i.parentStepKey === parentIteration.stepKey))
       )) || [];
   }
 
@@ -133,7 +136,7 @@ export class MultiInstanceModule {
 
   /* Boolean functions */
 
-  isMultiInstanceSubProcess(element) {
+  static isMultiInstanceSubProcess(element) {
     const businessObject = getBusinessObject(element);
     return is(element, 'bpmn:SubProcess') && businessObject.loopCharacteristics;
   }
@@ -282,7 +285,7 @@ export class MultiInstanceModule {
 
   loadIteration(loopCounter) {
 
-    const selectedIteration = this.dialogData.find(v => v.loopCounter == loopCounter);
+    const selectedIteration = this.dialogData.find(v => Number(v.loopCounter) === Number(loopCounter));
 
     this.breadcrumbSelection[this.getLastBreadcrumbIndex()] = selectedIteration;
 

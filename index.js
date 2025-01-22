@@ -227,7 +227,7 @@ class Viewer extends HTMLElement {
     eventBus.on('root.set', (event) => {
       const {element} = event;
       // if current element is not iterating -> iterating elements are handled inside module
-      if (!multiInstanceModule.isMultiInstanceSubProcess(element)) {
+      if (!multiInstanceModule.constructor.isMultiInstanceSubProcess(element)) {
         // update colors
         this.updateColors(this.current, this.completed, this.error);
       }
