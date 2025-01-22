@@ -1,4 +1,4 @@
-import CallActivityModule from './CallActivityModule';
+import { CallActivityModule } from './CallActivityModule';
 
 export default {
   __init__: ['callActivityModule'],
