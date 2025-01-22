@@ -26,12 +26,11 @@ class Viewer extends HTMLElement {
     this.regionId = this.getAttribute('regionId');
     this.themePluginClass = this.getAttribute('themePluginClass');
 
-    this.allowDownload = (this.getAttribute('allowDownload') === 'true');
-    this.addHighlighting = (this.getAttribute('addHighlighting') === 'true');
-    this.useBPMNcolors = (this.getAttribute('useBPMNcolors') === 'true');
     this.showToolbar = (this.getAttribute('showToolbar') === 'true');
-    this.enableMousewheelZoom = (this.getAttribute('enableMousewheelZoom') === 'true');
+    this.addHighlighting = (this.getAttribute('addHighlighting') === 'true');
     this.enableCallActivities = (this.getAttribute('enableCallActivities') === 'true');
+    this.enableMousewheelZoom = (this.getAttribute('enableMousewheelZoom') === 'true');
+    this.useBPMNcolors = (this.getAttribute('useBPMNcolors') === 'true');
 
     this.config = JSON.parse(this.getAttribute('config')) || {};
 
@@ -147,7 +146,7 @@ class Viewer extends HTMLElement {
     this.initViewer();
   }
 
-  async loadData(data) {
+  loadData(data) {
 
     let diagram;
     let oldLoaded = true;
@@ -207,56 +206,41 @@ class Viewer extends HTMLElement {
 
   async loadDiagram(diagramContent) {
     
-    try {
-      const result = await this.viewer.importXML(diagramContent);
-      const { warnings } = result;
-        
-      if (warnings.length > 0) {
-        apex.debug.warn('Warnings during XML Import', warnings);
+    const result = await this.viewer.importXML(diagramContent);
+    const { warnings } = result;
+      
+    if (warnings.length > 0) {
+      apex.debug.warn('Warnings during XML Import', warnings);
+    }
+      
+    this.zoom('fit-viewport');
+      
+    // get viewer modules
+    const eventBus = this.viewer.get('eventBus');
+    const multiInstanceModule = this.viewer.get('multiInstanceModule');
+    const userTaskModule = this.viewer.get('userTaskModule');
+
+    // update colors with the current highlighting info
+    this.updateColors(this.current, this.completed, this.error);
+      
+    // root.set -> drilled down into or moved out from sub process
+    eventBus.on('root.set', (event) => {
+      const {element} = event;
+      // if current element is not iterating -> iterating elements are handled inside module
+      if (!multiInstanceModule.isMultiInstanceSubProcess(element)) {
+        // update colors
+        this.updateColors(this.current, this.completed, this.error);
       }
-        
-      this.zoom('fit-viewport');
-        
-      // get viewer modules
-      const eventBus = this.viewer.get('eventBus');
-      const multiInstanceModule = this.viewer.get('multiInstanceModule');
-      const userTaskModule = this.viewer.get('userTaskModule');
+    });
 
-      // update colors with the current highlighting info
-      this.updateColors(this.current, this.completed, this.error);
-        
-      // root.set -> drilled down into or moved out from sub process
-      eventBus.on('root.set', (event) => {
-        const {element} = event;
-        // if current element is not iterating -> iterating elements are handled inside module
-        if (!multiInstanceModule.isMultiInstanceSubProcess(element)) {
-          // update colors
-          this.updateColors(this.current, this.completed, this.error);
-        }
-      });
+    // add overlays if iterationData is existing
+    if (this.iterationData) {
+      multiInstanceModule.addOverlays();
+    }
 
-      // add overlays if iterationData is existing
-      if (this.iterationData) {
-        multiInstanceModule.addOverlays();
-      }
-
-      // add overlays if userTaskData is existing
-      if (this.userTaskData) {
-        userTaskModule.addOverlays();
-      }
-
-      // trigger load event
-      // event.trigger( "#" + this.regionId, "mtbv_diagram_loaded", 
-      //   { 
-      //     diagramIdentifier: this.diagramIdentifier, 
-      //     callingDiagramIdentifier: this.callingDiagramIdentifier, 
-      //     callingObjectId: this.callingObjectId
-      //   } 
-      // );
-
-    } catch (err) {
-      console.log(err);
-      apex.debug.error('Loading Diagram failed.', err, this.diagram);
+    // add overlays if userTaskData is existing
+    if (this.userTaskData) {
+      userTaskModule.addOverlays();
     }
   }
 
@@ -292,25 +276,39 @@ class Viewer extends HTMLElement {
     this.viewer.get('canvas').zoom(zoomOption, 'auto');
   }
 
-  async downloadAsSVG() { // TODO add check allowDownload
-    try {
-      const result = await this.viewer.saveSVG({ format: true });
-      const { svg } = result;
+  async getDiagram() {
+    const result = await this.viewer.saveXML({ format: true });
+    const { xml } = result;
+    return xml;
+  }
 
-      const styledSVG = this.viewer.get('styleModule').addStyleToSVG(svg);
+  async getSVG() {
+    const result = await this.viewer.saveSVG({ format: true });
+    const { svg } = result;
+        
+    // add highlighting colors to image if option is enabled
+    if (this.addHighlighting) {
+      return this.viewer.get('styleModule').addStyleToSVG(svg);
+    }
 
-      const svgBlob = new Blob([styledSVG], {
-          type: 'image/svg+xml'
+    return svg;
+  }
+
+  async downloadAsSVG() {
+    const {allowDownload} = this.viewer.get('config').config;
+
+    if (allowDownload) {
+      const svg = await this.getSVG();
+      
+      const svgBlob = new Blob([svg], {
+        type: 'image/svg+xml',
       });
-      const fileName = `${Math.random(36).toString().substring(7)}.svg`;
+      const fileName = Date.now();
 
       const downloadLink = document.createElement('a');
       downloadLink.download = fileName;
       downloadLink.href = window.URL.createObjectURL(svgBlob);
       downloadLink.click();
-
-    } catch (err) {
-      console.log(err);
     }
   }
 }
