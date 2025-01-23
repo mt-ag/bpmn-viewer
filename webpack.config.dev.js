@@ -6,7 +6,7 @@ module.exports = {
     "flows4apex.viewer": [path.resolve(__dirname, "index.js")],
   },
   output: {
-    path: path.resolve(__dirname, "dist"),
+    path: path.resolve(__dirname, "dev"),
     filename: "[name].js",
     library: "bpmnViewer",
     libraryTarget: "var",
@@ -16,4 +16,16 @@ module.exports = {
     minimize: false,
   },
   devtool: "source-map",
+  module: {
+    rules: [
+      {
+        test: /\.css$/,
+        use: ["css-loader"],
+      },
+      {
+        test: /\.ttf$/,
+        use: ["file-loader"],
+      },
+    ],
+  },
 };
