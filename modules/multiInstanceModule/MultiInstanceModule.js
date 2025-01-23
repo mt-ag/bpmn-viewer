@@ -10,7 +10,7 @@ export class MultiInstanceModule {
     this._canvas = canvas;
     this._eventBus = eventBus;
     this._elementRegistry = elementRegistry;
-    this._translate = translate;
+    this._translate = translate; // TODO not translated?
     this._overlays = overlays;
     this._component = component;
 
@@ -49,7 +49,7 @@ export class MultiInstanceModule {
     // append content
     this._container.appendChild(modal);
 
-    eventBus.on('import.render.complete', () => {
+    this._eventBus.on('import.render.complete', () => {
       // add search listener for filtering
       const searchbar = domQuery('#iteration-search input', this._container);
       searchbar.addEventListener('keyup', (event) => {
@@ -63,7 +63,7 @@ export class MultiInstanceModule {
     });
 
     // when diagram root changes
-    eventBus.on('root.set', (event) => {
+    this._eventBus.on('root.set', (event) => {
       const { element } = event;
 
       // reset breadcrumb data (null all entries above the current)
@@ -93,8 +93,6 @@ export class MultiInstanceModule {
 
     // get parent iteration from breadcrumb
     const parentIteration = this.breadcrumbSelection[this.getLastBreadcrumbIndex() - 1];
-
-    console.log(parentIteration);
 
     // retrieve data from component by using id and stepKey
     return (this._component.iterationData &&

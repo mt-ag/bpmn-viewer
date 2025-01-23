@@ -210,7 +210,7 @@ class Viewer extends HTMLElement {
     const { warnings } = result;
       
     if (warnings.length > 0) {
-      apex.debug.warn('Warnings during XML Import', warnings);
+      apex.debug.warn('Warnings during XML Import', warnings); // TODO emit event
     }
       
     this.zoom('fit-viewport');

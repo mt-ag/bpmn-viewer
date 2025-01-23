@@ -5,18 +5,13 @@ import { domify, query as domQuery } from 'min-dom';
 
 var ARROW_DOWN_SVG = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M4.81801948,3.50735931 L10.4996894,9.1896894 L10.5,4 L12,4 L12,12 L4,12 L4,10.5 L9.6896894,10.4996894 L3.75735931,4.56801948 C3.46446609,4.27512627 3.46446609,3.80025253 3.75735931,3.50735931 C4.05025253,3.21446609 4.52512627,3.21446609 4.81801948,3.50735931 Z"/></svg>';
 
-function canDrillDown(element) {
-  return (is(element, 'bpmn:CallActivity'));
-}
-
 export class CallActivityModule {
   
-  constructor(canvas, eventBus, elementRegistry, overlays, moddle, component) {
+  constructor(canvas, eventBus, elementRegistry, overlays, component) {
     this._canvas = canvas;
     this._eventBus = eventBus;
     this._elementRegistry = elementRegistry;
     this._overlays = overlays;
-    this._moddle = moddle;
     this._component = component;
 
     // create and append breadcrumb
@@ -25,15 +20,16 @@ export class CallActivityModule {
     this._container.appendChild(this._breadcrumb);
 
     // add overlay for drilldown-able elements
-    eventBus.on('import.render.complete', () => {
-      elementRegistry
-        .filter(e => canDrillDown(e))
-        .forEach(el => this.addOverlay(el));
+    this._eventBus.on('import.render.complete', () => {
+      this._elementRegistry
+        .filter(e => is(e, 'bpmn:CallActivity'))
+        .forEach(e => this.addOverlay(e));
     });
   }
 
   addOverlay(element) {
-    var button = domify(`<button class="bjs-drilldown">${ARROW_DOWN_SVG}</button>`);
+    
+    const button = domify(`<button class="bjs-drilldown">${ARROW_DOWN_SVG}</button>`);
 
     // remove (possible) existing overlay
     if (this._overlays.get({ element: element, type: 'drilldown' }).length) {
@@ -44,13 +40,13 @@ export class CallActivityModule {
     button.addEventListener('click', (_) => {
 
       // clicked object
-      var objectId = element.id;
+      const objectId = element.id;
 
       // retrieve hieracry + current diagram
-      var { data, diagramIdentifier } = this._component;
+      const { data, diagramIdentifier } = this._component;
 
       // get new diagram from hierarchy
-      var newDiagram = data.find(
+      const newDiagram = data.find(
         d => d.callingDiagramIdentifier === diagramIdentifier &&
           d.callingObjectId === objectId
       );
@@ -103,14 +99,14 @@ export class CallActivityModule {
     const { data, diagramIdentifier, callingDiagramIdentifier, callingObjectId } = this._component;
 
     // retrieve properties of current diagram
-    var { breadcrumb } = data.find(
+    const { breadcrumb } = data.find(
       d => d.diagramIdentifier === diagramIdentifier &&
         d.callingDiagramIdentifier === callingDiagramIdentifier &&
         d.callingObjectId === callingObjectId
     );
 
     // breadcrumb list entry
-    var link = domify(
+    const link = domify(
       `<li data-index="${this._breadcrumb.childNodes.length}"
       ${diagramIdentifier ? ` data-diagramIdentifier="${diagramIdentifier}"` : ''}
       ${callingDiagramIdentifier ? ` data-callingDiagramIdentifier="${callingDiagramIdentifier}"` : ''}
@@ -123,13 +119,13 @@ export class CallActivityModule {
     link.addEventListener('click', (_) => {
 
       // clicked object
-      var { index, diagramidentifier } = link.dataset;
+      const { index, diagramidentifier } = link.dataset;
 
       // retrieve current(!) hierarchy
       const { data } = this._component;
 
       // get new diagram from hierarchy
-      var newDiagram = data.find(
+      const newDiagram = data.find(
         d => d.diagramIdentifier.toString() === diagramidentifier
       );
 
@@ -171,8 +167,8 @@ export class CallActivityModule {
   }
 
   trimBreadcrumbTo(index) {
-    var flag = false;
-    var removeNodes = [];
+    let flag = false;
+    const removeNodes = [];
 
     for (let i = 0; i < this._breadcrumb.childNodes.length; i++) {
       if (flag) {
@@ -221,6 +217,5 @@ CallActivityModule.$inject = [
   'eventBus',
   'elementRegistry',
   'overlays',
-  'moddle',
   'config.component'
 ];
