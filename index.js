@@ -8,13 +8,13 @@ import ZoomScrollModule from 'diagram-js/lib/navigation/zoomscroll';
 import customPaletteProviderModule from './lib/viewerPalette';
 import callActivityModule from './modules/callActivityModule';
 import drilldownCentering from './modules/drilldownCentering';
-import styleModule from './modules/styleModule';
 import multiInstanceModule from './modules/multiInstanceModule';
+import styleModule from './modules/styleModule';
 import userTaskModule from './modules/userTaskModule/';
 
-import css from './assets/css/style.css';
 import bpmnCSS from 'bpmn-js/dist/assets/bpmn-js.css';
 import diagramCSS from 'bpmn-js/dist/assets/diagram-js.css';
+import css from './assets/css/style.css';
 
 import embeddedFontCSS from './assets/css/bpmn-embedded-font.css';
 import embeddedRulesCSS from './assets/css/bpmn-embedded-rules.css';
@@ -46,7 +46,7 @@ class Viewer extends HTMLElement {
     document.head.appendChild(styleGlobal);
 
     // copy apex font file from global page to shadow dom
-    const apexFontFile = Array.from(document.styleSheets).find(s => s.href && s.href.includes('font-apex.min.css'));
+    const apexFontFile = Array.from(document.styleSheets).find(s => s.href && (s.href.includes('font-apex.min.css') || s.href.includes('font-apex.css')));
 
     if (apexFontFile) {
       const styleShadow = document.createElement('style');
