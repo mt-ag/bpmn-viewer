@@ -9,7 +9,7 @@
  */
 export default function DrilldownCentering(eventBus, canvas) {
 
-  eventBus.on('root.set', () => canvas.zoom('fit-viewport', 'auto'));
+  eventBus.on('root.set', () => { canvas.zoom('fit-viewport', 'auto'); });
 }
 
 DrilldownCentering.$inject = ['eventBus', 'canvas'];
